@@ -23,8 +23,26 @@ router.get('/search', (req, res) => {
       });
     }
 
+    // Validate field parameter
+    const validFields = ['all', 'title', 'description', 'tags'];
+    if (!validFields.includes(field)) {
+      return res.status(400).json({
+        error: 'Invalid field parameter',
+        message: `Field must be one of: ${validFields.join(', ')}`
+      });
+    }
+
+    // Validate and parse limit parameter
+    const parsedLimit = parseInt(limit, 10);
+    if (isNaN(parsedLimit) || parsedLimit < 1) {
+      return res.status(400).json({
+        error: 'Invalid limit parameter',
+        message: 'Limit must be a positive number'
+      });
+    }
+    const maxLimit = Math.min(parsedLimit, 100); // Cap at 100 to prevent excessive results
+
     const query = q.toLowerCase().trim();
-    const maxLimit = parseInt(limit, 10);
 
     // Perform search
     const results = searchData.filter(item => {
